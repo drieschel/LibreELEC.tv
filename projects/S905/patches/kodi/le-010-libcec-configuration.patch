@@ -1,5 +1,5 @@
 diff --git a/system/peripherals.xml b/system/peripherals.xml
-index 67f6b7a..8d227ad 100644
+index 67f6b7a..017b179 100644
 --- a/system/peripherals.xml
 +++ b/system/peripherals.xml
 @@ -11,13 +11,13 @@

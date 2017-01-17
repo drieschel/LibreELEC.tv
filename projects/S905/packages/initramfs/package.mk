@@ -43,9 +43,13 @@ if [ "$INITRAMFS_PARTED_SUPPORT" = yes ]; then
 fi
 
 post_install() {
-  cd $ROOT/$BUILD/initramfs
+  ( cd $ROOT/$BUILD/initramfs
     if [ "$TARGET_ARCH" = "x86_64" -o "$TARGET_ARCH" = "powerpc64" ]; then
       ln -s /lib $ROOT/$BUILD/initramfs/lib64
+    fi
+
+    if [ $TARGET_KERNEL_ARCH == "arm64" ] && [ $TARGET_ARCH == "arm" ]; then
+      STRIP=$ROOT/$TOOLCHAIN/lib/gcc-linaro-aarch64-linux-gnu/bin/aarch64-linux-gnu-strip
     fi
 
     for MOD in `find ./lib/modules/ -type f -name *.ko`; do
@@ -53,6 +57,7 @@ post_install() {
     done
 
     mkdir -p $ROOT/$BUILD/image/
-    find . | cpio -H newc -ov -R 0:0 | lzop > $ROOT/$BUILD/image/initramfs.cpio
-  cd -
+    fakeroot -- sh -c \
+      "mkdir -p dev; mknod -m 600 dev/console c 5 1; find . | cpio -H newc -ov -R 0:0 | lzop > $ROOT/$BUILD/image/initramfs.cpio"
+  )
 }
