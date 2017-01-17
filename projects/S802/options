@@ -32,7 +32,7 @@
   # Kernel to use. values can be:
   # default:  default mainline kernel
     LINUX="custom"
-    KERNEL_VERSION="cff7c42"
+    KERNEL_VERSION="f20369d" #cff7c42
     KERNEL_URL="https://github.com/drieschel/linux/archive/$KERNEL_VERSION.tar.gz"
 
 ################################################################################
