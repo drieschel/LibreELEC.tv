@@ -245,6 +245,9 @@ fi
   $ROOT/$TOOLCHAIN/bin/depmod -b $INSTALL $MODVER 2> /dev/null
 
 # strip kernel modules
+  if [ "$TARGET_KERNEL_ARCH" = "arm64" -a "$TARGET_ARCH" = "arm" ]; then
+    STRIP=$ROOT/$TOOLCHAIN/lib/gcc-linaro-aarch64-linux-gnu/bin/aarch64-linux-gnu-strip
+  fi
   for MOD in `find $INSTALL/lib/modules/ -type f -name *.ko`; do
     $STRIP --strip-debug $MOD
   done
@@ -262,23 +265,32 @@ fi
     echo "Building Amlogic DeviceTreeBlobs and injecting them to kernel..."
     pushd "$BUILD/linux-$(kernel_version)" > /dev/null
     rm -rf arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic/*.dtb arch/$TARGET_KERNEL_ARCH/boot/dtb.img arch/$TARGET_KERNEL_ARCH/boot/boot.img
+    if [ "$TARGET_KERNEL_ARCH" = "arm64" -a "$TARGET_ARCH" = "arm" ]; then
+      PATH=$ROOT/$TOOLCHAIN/lib/gcc-linaro-aarch64-linux-gnu/bin/:$PATH
+      TARGET_PREFIX=aarch64-linux-gnu-
+    fi
     for extra_target in $KERNEL_UBOOT_EXTRA_TARGET; do
       LDFLAGS="" make $extra_target > /dev/null
     done
     DTB_BLOBS=($(ls arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic/*.dtb 2>/dev/null || true))
     DTB_BLOBS_COUNT="${#DTB_BLOBS[@]}"
+    DTB_BLOB_OUTPUT="arch/$TARGET_KERNEL_ARCH/boot/dtb.img"
+    MKBOOTIMG_SECOND="--second $DTB_BLOB_OUTPUT"
     if [ "$DTB_BLOBS_COUNT" -gt 1 ]; then
-      $ROOT/tools/dtbTool/dtbTool -o arch/$TARGET_KERNEL_ARCH/boot/dtb.img -p scripts/dtc/ arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic/
-      MKBOOTIMG_SECOND="--second arch/$TARGET_KERNEL_ARCH/boot/dtb.img"
+      $ROOT/tools/dtbTool/dtbTool -o $DTB_BLOB_OUTPUT -p scripts/dtc/ arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic/
     elif [ "$DTB_BLOBS_COUNT" -eq 1 ]; then
-      MKBOOTIMG_SECOND="--second $DTB_BLOBS"
+      cp -f arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic/*.dtb $DTB_BLOB_OUTPUT
     else
       MKBOOTIMG_SECOND=""
     fi
     mkbootimg --kernel arch/$TARGET_KERNEL_ARCH/boot/$KERNEL_TARGET --ramdisk $ROOT/$BUILD/image/initramfs.cpio \
       $MKBOOTIMG_SECOND $MKBOOTIMG_OPTIONS --output arch/$TARGET_KERNEL_ARCH/boot/boot.img
     echo "...done"
+    if [ -f $DTB_BLOB_OUTPUT ]; then
+      cp -f $DTB_BLOB_OUTPUT $TARGET_IMG/$IMAGE_NAME.dtb
+    fi
     popd > /dev/null
+
     cp -PR $BUILD/linux-$(kernel_version)/arch/$TARGET_KERNEL_ARCH/boot/boot.img $TARGET_IMG/$IMAGE_NAME.kernel
   else
     cp -PR $BUILD/linux-$(kernel_version)/arch/$TARGET_KERNEL_ARCH/boot/$KERNEL_TARGET $TARGET_IMG/$IMAGE_NAME.kernel
@@ -481,8 +493,6 @@ fi
         fi
         if [ -f $INSTALL_SRC_DIR/files/aml_autoscript ]; then
           cp $INSTALL_SRC_DIR/files/aml_autoscript .
-        elif [ -f "$INSTALL_SRC_DIR/aml_autoscript.src" ]; then
-          $MKIMAGE_TOOL_CMD "$INSTALL_SRC_DIR/aml_autoscript.src" aml_autoscript > /dev/null
         fi
         zip -q $TARGET_IMG/$IMAGE_NAME.zip *
         popd > /dev/null

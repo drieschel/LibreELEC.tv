@@ -17,10 +17,10 @@
 ################################################################################
 
 PKG_NAME="docker"
-PKG_VERSION="1.12.0"
-PKG_REV="106"
+PKG_VERSION="1.12.5"
+PKG_REV="110"
 PKG_ARCH="any"
-PKG_ADDON_PROJECTS="Generic RPi RPi2"
+PKG_ADDON_PROJECTS="Generic RPi RPi2 S905"
 PKG_LICENSE="ASL"
 PKG_SITE="http://www.docker.com/"
 PKG_URL="https://github.com/docker/docker/archive/v${PKG_VERSION}.tar.gz"
@@ -54,10 +54,13 @@ configure_target() {
         arm1176jzf-s)
           export GOARM=6
           ;;
-        cortex-a7)
+        cortex-a*)
          export GOARM=7
          ;;
       esac
+      ;;
+    aarch64)
+      export GOARCH=arm64
       ;;
   esac
 
@@ -65,7 +68,7 @@ configure_target() {
   export CGO_ENABLED=1
   export CGO_NO_EMULATION=1
   export CGO_CFLAGS=$CFLAGS
-  export LDFLAGS="-w -linkmode external -extldflags -Wl,--unresolved-symbols=ignore-in-shared-libs -extld $TARGET_CC"
+  export LDFLAGS="-w -linkmode external -extldflags -Wl,--unresolved-symbols=ignore-in-shared-libs -extld $CC"
   export GOLANG=$ROOT/$TOOLCHAIN/lib/golang/bin/go
   export GOPATH=$ROOT/$PKG_BUILD/.gopath:$ROOT/$PKG_BUILD/vendor
   export GOROOT=$ROOT/$TOOLCHAIN/lib/golang

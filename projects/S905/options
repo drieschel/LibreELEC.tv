@@ -2,8 +2,18 @@
 # setup system defaults
 ################################################################################
 
-    TARGET_ARCH="aarch64"
     TARGET_CPU="cortex-a53"
+
+    case $TARGET_ARCH in
+      aarch64)
+        TARGET_CPU_FLAGS="+crc+fp+simd"
+        ;;
+      arm)
+        TARGET_CPU_FLAGS="+crc"
+        TARGET_FPU="neon-fp-armv8"
+        TARGET_FLOAT="hard"
+        ;;
+    esac
 
   # Bootloader to use (syslinux / u-boot / bcm2835-bootloader)
     BOOTLOADER="u-boot"
@@ -21,7 +31,7 @@
     KERNEL_TARGET="Image.lzo"
 
   # Kernel extra targets to build
-    KERNEL_UBOOT_EXTRA_TARGET="gxbb_p200.dtb"
+    KERNEL_UBOOT_EXTRA_TARGET="gxbb_p200.dtb gxbb_p200_2G.dtb gxl_p212_1g.dtb gxl_p212_2g.dtb"
 
   # Build Android kernel image using mkbootimg
     BUILD_ANDROID_BOOTIMG="yes"
@@ -32,13 +42,14 @@
     MKBOOTIMG_OPTIONS="--base 0x0 --kernel_offset 0x1080000"
 
   # Additional kernel make parameters (for example to specify the u-boot loadaddress)
-    KERNEL_MAKE_EXTRACMD="gxbb_p200.dtb"
+    KERNEL_MAKE_EXTRACMD=""
 
   # Kernel to use. values can be:
   # default:  default mainline kernel
     LINUX="custom"
-    KERNEL_VERSION="1bf2a10"
-    KERNEL_URL="https://github.com/kszaq/linux/archive/$KERNEL_VERSION.tar.gz"
+    KERNEL_VERSION="3f3c6f3"
+    KERNEL_URL="https://github.com/kszaq/linux-amlogic-le/archive/$KERNEL_VERSION.tar.gz"
+    KERNEL_SOURCE_DIR="linux-amlogic-le-$KERNEL_VERSION*"
 
 ################################################################################
 # setup build defaults
@@ -58,9 +69,6 @@
 
   # SquashFS compression method (gzip / lzo / xz)
     SQUASHFS_COMPRESSION="lzo"
-
-  # SquashFS block size (default: 131072)
-    SQUASHFS_BLOCK_SIZE="16384"
 
 ################################################################################
 # setup project defaults
@@ -99,18 +107,18 @@
     DCADEC_SUPPORT="yes"
 
   # Modules to install in initramfs for early boot
-    INITRAMFS_MODULES="aml_nftl_dev"
+    INITRAMFS_MODULES="font softcursor bitblit fbcon aml_nftl_dev"
 
   # additional drivers to install:
   # for a list of additinoal drivers see packages/linux-drivers
   # Space separated list is supported,
   # e.g. ADDITIONAL_DRIVERS="DRIVER1 DRIVER2"
-    ADDITIONAL_DRIVERS="RTL8192CU RTL8192DU media-backports"
+    ADDITIONAL_DRIVERS="RTL8192CU RTL8192DU RTL8192EU RTL8812AU media_build gpu-aml qca9377-aml"
 
   # additional Firmware to use (dvb-firmware, misc-firmware, wlan-firmware)
   # Space separated list is supported,
   # e.g. FIRMWARE="dvb-firmware misc-firmware wlan-firmware"
-    FIRMWARE="misc-firmware wlan-firmware dvb-firmware brcmfmac_sdio-firmware-aml rtl8723bs_bt"
+    FIRMWARE="misc-firmware wlan-firmware dvb-firmware brcmfmac_sdio-firmware-aml rtl8723bs_bt qca9377-firmware-aml"
 
   # build and install ATV IR remote support (yes / no)
     ATVCLIENT_SUPPORT="no"
@@ -141,12 +149,8 @@
     KERNEL_NAME="kernel.img"
 
   # set the addon dirs
-    ADDON_SERVER_URL="https://raw.github.com/wrxtasy/LibreELEC.tv.7.0/LE-7.0.Addons"
-    ADDON_PATH="addons/$ADDON_VERSION/Odroid_C2/$TARGET_ARCH"
+    ADDON_SERVER_URL="http://kszaq.libreelec.tv/addons"
     ADDON_URL="$ADDON_SERVER_URL/$ADDON_PATH"
-
-  # Hardware random number generator daemon
-    HW_RNG="yes"
 
   # OEM packages for OEM's (yes / no)
     OEM_SUPPORT="yes"

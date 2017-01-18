@@ -61,6 +61,8 @@ trap cleanup SIGINT
   UUID_2=$(date '+%M%S')
   FAT_VOL_ID="${UUID_1}${UUID_2}"
   UUID_SYSTEM="${UUID_1}-${UUID_2}"
+  FAT_VOL_LABEL="BOOT"
+  EXT_VOL_LABEL="DISK"
 
 # create an image
   echo
@@ -117,7 +119,7 @@ fi
   if [ "$BOOTLOADER" = "syslinux" ]; then
     mformat -v "$FAT_VOL_ID" -N "$FAT_VOL_ID" ::
   elif [ "$BOOTLOADER" = "bcm2835-bootloader" -o "$BOOTLOADER" = "u-boot" ]; then
-    mformat ::
+    mformat -v "$FAT_VOL_LABEL" ::
   fi
   sync
 
@@ -224,6 +226,11 @@ elif [ "$BOOTLOADER" = "u-boot" ]; then
     mcopy $RELEASE_DIR/target/KERNEL.md5 "::/$KERNEL_NAME.md5"
     mcopy $RELEASE_DIR/target/SYSTEM.md5 ::/SYSTEM.md5
 
+    if [ -f $TARGET_IMG/$IMAGE_NAME.dtb ]; then
+      echo "image: copying dtb to part1..."
+      mcopy $TARGET_IMG/$IMAGE_NAME.dtb ::/dtb.img
+    fi
+
     if [ -n "$UBOOT_SYSTEM" -a -f "$RELEASE_DIR/3rdparty/bootloader/u-boot-$UBOOT_SYSTEM.img" ]; then
       mcopy "$RELEASE_DIR/3rdparty/bootloader/u-boot-$UBOOT_SYSTEM.img" ::/u-boot.img
     elif [ -f $RELEASE_DIR/3rdparty/bootloader/u-boot.img ]; then
@@ -237,10 +244,12 @@ elif [ "$BOOTLOADER" = "u-boot" ]; then
     done
 fi # bootloader
 
-if [ -f "$INSTALL_SRC_DIR/aml_autoscript.src" ]; then
-  $MKIMAGE_TOOL_CMD "$INSTALL_SRC_DIR/aml_autoscript.src" "$OE_TMP/aml_autoscript" > /dev/null
-  mcopy "$OE_TMP/aml_autoscript" "::/aml_autoscript"
-fi
+for src in $INSTALL_SRC_DIR/*autoscript.src ; do
+  if [ -e "$src" ] ; then
+    $MKIMAGE_TOOL_CMD "$src" "$OE_TMP/$(basename $src .src)" > /dev/null
+    mcopy "$OE_TMP/$(basename $src .src)" ::
+  fi
+done
 
 # extract part2 from image to format and copy files
   echo "image: extracting part2 from image..."
@@ -251,7 +260,7 @@ fi
 # create filesystem on part2
   echo "image: creating filesystem on part2..."
   mke2fs -F -q -t ext4 -m 0 "$OE_TMP/part2.ext4"
-  tune2fs -U $UUID_STORAGE "$OE_TMP/part2.ext4" >"$SAVE_ERROR" 2>&1 || show_error
+  tune2fs -L "$EXT_VOL_LABEL" -U $UUID_STORAGE "$OE_TMP/part2.ext4" >"$SAVE_ERROR" 2>&1 || show_error
   e2fsck -n "$OE_TMP/part2.ext4" >"$SAVE_ERROR" 2>&1 || show_error
   sync
 

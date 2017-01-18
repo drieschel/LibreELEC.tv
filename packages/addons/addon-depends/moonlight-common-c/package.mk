@@ -17,7 +17,7 @@
 ################################################################################
 
 PKG_NAME="moonlight-common-c"
-PKG_VERSION="a6d9ab0"
+PKG_VERSION="1d058cb"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv3"
