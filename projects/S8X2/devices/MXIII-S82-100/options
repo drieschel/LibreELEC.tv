@@ -1,0 +1,6 @@
+KERNEL_UBOOT_EXTRA_TARGET="meson8_k200b_2G_emmc_sdio.dtd meson8_k200b_2G_emmc_sdio.dtb"
+KERNEL_UBOOT_EXTRA_TARGET+=" meson8_k200b_1G_emmc_sdio.dtd meson8_k200b_1G_emmc_sdio.dtb"
+KERNEL_UBOOT_EXTRA_TARGET+=" meson8_k200b_2G_emmc_sdhc.dtd meson8_k200b_2G_emmc_sdhc.dtb"
+KERNEL_UBOOT_EXTRA_TARGET+=" meson8_k200b_1G_emmc_sdhc.dtd meson8_k200b_1G_emmc_sdhc.dtb"
+KERNEL_UBOOT_EXTRA_TARGET+=" meson8m2_n200_2G.dtd meson8m2_n200_2G.dtb"
+KERNEL_UBOOT_EXTRA_TARGET+=" meson8m2_n200_1G.dtd meson8m2_n200_1G.dtb"

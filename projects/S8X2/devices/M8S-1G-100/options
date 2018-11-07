@@ -1,0 +1,1 @@
+KERNEL_UBOOT_EXTRA_TARGET="meson8m2_n200_1G.dtd meson8m2_n200_1G.dtb"
