@@ -1,0 +1,93 @@
+diff -Naur brcmap6xxx-aml-de3f5c5.orig/bcmdhd_1_201_59_x/bcmsdh_sdmmc.c brcmap6xxx-aml-de3f5c5/bcmdhd_1_201_59_x/bcmsdh_sdmmc.c
+--- brcmap6xxx-aml-de3f5c5.orig/bcmdhd_1_201_59_x/bcmsdh_sdmmc.c	2018-11-05 21:29:50.147290000 +0100
++++ brcmap6xxx-aml-de3f5c5/bcmdhd_1_201_59_x/bcmsdh_sdmmc.c	2018-11-05 21:33:30.000000000 +0100
+@@ -706,7 +706,7 @@
+ }
+ 
+ #if (defined(OOB_INTR_ONLY) && defined(HW_OOB)) || defined(FORCE_WOWLAN)
+-extern int wifi_irq_trigger_level(void);
++//extern int wifi_irq_trigger_level(void);
+ SDIOH_API_RC
+ sdioh_enable_hw_oob_intr(sdioh_info_t *sd, bool enable)
+ {
+@@ -714,10 +714,10 @@
+ 	uint8 data;
+ 
+ 	if (enable) {
+-		if (wifi_irq_trigger_level() == GPIO_IRQ_LOW)
+-			data = SDIO_SEPINT_MASK | SDIO_SEPINT_OE;
+-		else
+-			data = SDIO_SEPINT_MASK | SDIO_SEPINT_OE | SDIO_SEPINT_ACT_HI;
++//		if (wifi_irq_trigger_level() == GPIO_IRQ_LOW)
++//			data = SDIO_SEPINT_MASK | SDIO_SEPINT_OE;
++//		else
++		data = SDIO_SEPINT_MASK | SDIO_SEPINT_OE | SDIO_SEPINT_ACT_HI;
+ 	}
+ 	else
+ 		data = SDIO_SEPINT_ACT_HI;	/* disable hw oob interrupt */
+diff -Naur brcmap6xxx-aml-de3f5c5.orig/bcmdhd_1_201_59_x/dhd_gpio.c brcmap6xxx-aml-de3f5c5/bcmdhd_1_201_59_x/dhd_gpio.c
+--- brcmap6xxx-aml-de3f5c5.orig/bcmdhd_1_201_59_x/dhd_gpio.c	2018-11-05 21:29:50.147290000 +0100
++++ brcmap6xxx-aml-de3f5c5/bcmdhd_1_201_59_x/dhd_gpio.c	2018-11-05 21:31:46.000000000 +0100
+@@ -18,7 +18,7 @@
+ #endif
+ #endif
+ 
+-extern u8 *wifi_get_mac(void);
++//extern u8 *wifi_get_mac(void);
+ struct wifi_platform_data dhd_wlan_control = {0};
+ 
+ #ifdef CUSTOMER_OOB
+@@ -117,25 +117,25 @@
+ 	return err;
+ }
+ 
+-int bcm_wlan_get_mac_address(unsigned char *buf)
+-{
+-	int err = 0;
+-
+-	printf("======== %s ========\n", __FUNCTION__);
+-#ifdef EXAMPLE_GET_MAC
+-	/* EXAMPLE code */
+-	{
+-		struct ether_addr ea_example = {{0x00, 0x11, 0x22, 0x33, 0x44, 0xFF}};
+-		bcopy((char *)&ea_example, buf, sizeof(struct ether_addr));
+-	}
+-#endif /* EXAMPLE_GET_MAC */
+-	bcopy((char *)wifi_get_mac(), buf, sizeof(struct ether_addr));
+-	if (buf[0] == 0xff) {
+-		printf("custom wifi mac is not set\n");
+-		err = -1;
+-	}
+-	return err;
+-}
++//int bcm_wlan_get_mac_address(unsigned char *buf)
++//{
++//	int err = 0;
++//
++//	printf("======== %s ========\n", __FUNCTION__);
++//#ifdef EXAMPLE_GET_MAC
++//	/* EXAMPLE code */
++//	{
++//		struct ether_addr ea_example = {{0x00, 0x11, 0x22, 0x33, 0x44, 0xFF}};
++//		bcopy((char *)&ea_example, buf, sizeof(struct ether_addr));
++//	}
++//#endif /* EXAMPLE_GET_MAC */
++//	bcopy((char *)wifi_get_mac(), buf, sizeof(struct ether_addr));
++//	if (buf[0] == 0xff) {
++//		printf("custom wifi mac is not set\n");
++//		err = -1;
++//	}
++//	return err;
++//}
+ 
+ #ifdef CONFIG_DHD_USE_STATIC_BUF
+ extern void *bcmdhd_mem_prealloc(int section, unsigned long size);
+@@ -190,7 +190,7 @@
+ 	printf("======== %s ========\n", __FUNCTION__);
+ 	dhd_wlan_control.set_power = bcm_wlan_set_power;
+ 	dhd_wlan_control.set_carddetect = bcm_wlan_set_carddetect;
+-	dhd_wlan_control.get_mac_addr = bcm_wlan_get_mac_address;
++	//dhd_wlan_control.get_mac_addr = bcm_wlan_get_mac_address;
+ #ifdef CONFIG_DHD_USE_STATIC_BUF
+ 	dhd_wlan_control.mem_prealloc = bcm_wlan_prealloc;
+ #endif
