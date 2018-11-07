@@ -64,6 +64,7 @@ trap cleanup SIGINT
   FAT_SERIAL_NUMBER="${UUID_1}${UUID_2}"
   UUID_SYSTEM="${UUID_1}-${UUID_2}"
   FAT_VOLUME_LABEL="LIBREELEC"
+  EXT_VOLUME_LABEL="LIBREELEC_DISK"
 
 # create an image
   echo
@@ -236,6 +237,11 @@ elif [ "$BOOTLOADER" = "u-boot" ]; then
     mcopy $RELEASE_DIR/target/KERNEL.md5 "::/$KERNEL_NAME.md5"
     mcopy $RELEASE_DIR/target/SYSTEM.md5 ::/SYSTEM.md5
 
+    if [ -f $TARGET_IMG/$IMAGE_NAME.dtb ]; then
+      echo "image: copying dtb to part1..."
+      mcopy $TARGET_IMG/$IMAGE_NAME.dtb ::/dtb.img
+    fi
+
     if [ -n "$UBOOT_SYSTEM" -a -f "$RELEASE_DIR/3rdparty/bootloader/u-boot-$UBOOT_SYSTEM.img" ]; then
       mcopy "$RELEASE_DIR/3rdparty/bootloader/u-boot-$UBOOT_SYSTEM.img" ::/u-boot.img
     elif [ -f $RELEASE_DIR/3rdparty/bootloader/u-boot.img ]; then
@@ -258,6 +264,15 @@ elif [ "$BOOTLOADER" = "u-boot" ]; then
     fi
 fi # bootloader
 
+if [ "$UBOOT_VERSION" != "hardkernel" ]; then
+  for src in $INSTALL_SRC_DIR/*autoscript.src ; do
+    if [ -e "$src" ] ; then
+      $MKIMAGE_TOOL_CMD "$src" "$LE_TMP/$(basename $src .src)" > /dev/null
+      mcopy "$LE_TMP/$(basename $src .src)" ::
+    fi
+  done
+fi
+
 # extract part2 from image to format and copy files
   echo "image: extracting part2 from image..."
   STORAGE_PART_COUNT=$(( $STORAGE_PART_END - $STORAGE_PART_START + 1 ))
@@ -267,7 +282,7 @@ fi # bootloader
 # create filesystem on part2
   echo "image: creating filesystem on part2..."
   mke2fs -F -q -t ext4 -m 0 "$LE_TMP/part2.ext4"
-  tune2fs -U $UUID_STORAGE "$LE_TMP/part2.ext4" >"$SAVE_ERROR" 2>&1 || show_error
+  tune2fs -L "$EXT_VOLUME_LABEL" -U $UUID_STORAGE "$LE_TMP/part2.ext4" >"$SAVE_ERROR" 2>&1 || show_error
   e2fsck -n "$LE_TMP/part2.ext4" >"$SAVE_ERROR" 2>&1 || show_error
   sync
 
