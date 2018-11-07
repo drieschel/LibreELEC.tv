@@ -265,3 +265,29 @@ diff -Naur linux-cff7c42.orig/arch/arm/boot/dts/amlogic/meson8m2_n200_2G.dtd lin
  
  /// ***************************************************************************************
  ///	-	DVB
+diff -Naur linux-cff7c42.orig/arch/arm/boot/dts/amlogic/meson8_k200b_2G_emmc_sdio.dtd linux-cff7c42/arch/arm/boot/dts/amlogic/meson8_k200b_2G_emmc_sdio.dtd
+--- linux-cff7c42.orig/arch/arm/boot/dts/amlogic/meson8_k200b_2G_emmc_sdio.dtd	2018-11-04 21:46:58.694622305 +0100
++++ linux-cff7c42/arch/arm/boot/dts/amlogic/meson8_k200b_2G_emmc_sdio.dtd	2018-11-04 21:48:32.000000000 +0100
+@@ -133,11 +133,11 @@
+ 		compatible = "amlogic,mesonfb";
+ 		dev_name = "mesonfb";
+ 		status = "okay";
+-		reserve-memory = <0x01800000  0x00100000>;
++		reserve-memory = <0x04800000 0x00100000>;
+ 		reserve-iomap = "true";
+                 vmode = <3>; /**0:VMODE_720P 1:VMODE_LCD  2:VMODE_LVDS_1080P 3:VMODE_1080P*/
+ 		scale_mode = <1>; /*0:default 1:new*/
+-		4k2k_fb = <0>;
++		4k2k_fb = <1>;
+ 		display_size_default = <1920 1080 1920 3240 32>; //1920*1080*4*3 = 0x17BB000
+ 	};
+ 
+@@ -175,7 +175,7 @@
+                 compatible = "amlogic,vdec";
+                 dev_name = "vdec.0";
+                 status = "okay";
+-								reserve-memory = <0x04000000>; // 64M
++								reserve-memory = <0x10000000>; // 64M
+ //		reserve-iomap = "true";
+         };
+ ///	-	picture decoder
